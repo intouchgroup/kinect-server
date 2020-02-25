@@ -38,11 +38,6 @@ router.get('/', (async (ctx, next) => {
     ctx.body = 'Kinect-ion made ;)';
 }) as Koa.Middleware);
 
-router.get('/kinect', (async (ctx, next) => {
-    ctx.status = 200;
-    ctx.body = 'Kinect data';
-}) as Koa.Middleware);
-
 app.use(router.routes());
 app.use(router.allowedMethods());
 
@@ -59,6 +54,16 @@ if (kinect.open()) {
     kinect.createTracker();
 }
 
-io.on('connection', socket => kinect.startListening(data => socket.emit('kinectData', data.depthImageFrame)));
+io.on('connection', socket => {
+    console.log('CLIENT CONNECTED');
+    kinect.startListening(data => socket.emit('kinectData', data.depthImageFrame));
+
+    socket.on('disconnect', async () => {
+        console.log('CLIENT DISCONNECTED');
+        await kinect.stopListening();
+        kinect.destroyTracker();
+        kinect.stopCameras();
+    });
+});
 
 server.listen(PORT || 3000);

@@ -7,6 +7,9 @@ export default class KinectAzure {
     
     open (): any;
     startCameras (options: { depth_mode: string, color_resolution: string }): void;
+    stopCameras (): void;
     createTracker (): void;
+    destroyTracker (): void;
     startListening (callback: (data: any) => void): void;
+    stopListening (): Promise<void>;
 }
