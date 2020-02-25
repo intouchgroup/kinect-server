@@ -5,6 +5,8 @@ import cors from '@koa/cors';
 import bodyParser from 'koa-bodyparser';
 import errorHandler from './errorHandler';
 import router from './router';
+import http from 'http';
+import Socket from 'socket.io';
 
 const { PORT, CORS_DOMAIN } = process.env;
 const app = new Koa();
@@ -20,4 +22,14 @@ app.use(bodyParser());
 app.use(errorHandler());
 app.use(router.routes());
 app.use(router.allowedMethods());
-app.listen(PORT || 3000);
+
+const server = http.createServer(app.callback());
+const io = Socket(server);
+
+io.on('connection', socket => {
+    console.log('CLIENT CONNECTED TO SOCKET');
+});
+
+console
+
+server.listen(PORT || 3000);
