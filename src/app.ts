@@ -30,6 +30,4 @@ io.on('connection', socket => {
     console.log('CLIENT CONNECTED TO SOCKET');
 });
 
-console
-
 server.listen(PORT || 3000);
