@@ -6,7 +6,7 @@ import bodyParser from 'koa-bodyparser';
 import Router from '@koa/router';
 import http from 'http';
 import Socket from 'socket.io';
-import KinectAzure from 'kinect-azure';
+import { startKinect, stopKinect } from './kinect';
 
 const { PORT, CORS_DOMAIN } = process.env;
 const app = new Koa();
@@ -43,26 +43,22 @@ app.use(router.allowedMethods());
 
 const server = http.createServer(app.callback());
 const io = Socket(server);
-const kinect = new KinectAzure();
 
-if (kinect.open()) {
-    kinect.startCameras({
-        depth_mode: KinectAzure.K4A_DEPTH_MODE_NFOV_UNBINNED,
-        color_resolution: KinectAzure.K4A_COLOR_RESOLUTION_1080P
-    });
-
-    kinect.createTracker();
-}
+let clients: { guid: number, socket: Socket.Socket }[] = [];
 
 io.on('connection', socket => {
     console.log('CLIENT CONNECTED');
-    kinect.startListening(data => socket.emit('kinectData', data.depthImageFrame));
+    startKinect(io);
+    const guid = Math.random() * 100;
+    clients.push({ guid, socket });
 
     socket.on('disconnect', async () => {
         console.log('CLIENT DISCONNECTED');
-        await kinect.stopListening();
-        kinect.destroyTracker();
-        kinect.stopCameras();
+        clients = clients.filter(client => client.guid !== guid);
+
+        if (!clients.length) {
+            stopKinect();
+        }
     });
 });
 
