@@ -53,7 +53,8 @@ io.on('connection', socket => {
         }
     });
 
-    startKinect(io);
+    const depthModeRange = startKinect(io);
+    socket.emit('depthModeRange', depthModeRange);
 });
 
 server.listen(PORT || 3000);
