@@ -3,6 +3,7 @@ import Koa from 'koa';
 import logger from 'koa-logger';
 import cors from '@koa/cors';
 import bodyParser from 'koa-bodyparser';
+import { errorHandler, generateGuid } from './utility';
 import Router from '@koa/router';
 import http from 'http';
 import Socket from 'socket.io';
@@ -19,17 +20,7 @@ if (CORS_DOMAIN) {
 }
 
 app.use(bodyParser());
-
-app.use(async (ctx, next) => {
-    try {
-        await next();
-    }
-    catch (error) {
-        ctx.status = error.status || 500;
-        ctx.body = error.message;
-        ctx.app.emit('error', error, ctx);
-    }
-});
+app.use(errorHandler());
 
 const router = new Router();
 
@@ -44,22 +35,25 @@ app.use(router.allowedMethods());
 const server = http.createServer(app.callback());
 const io = Socket(server);
 
-let clients: { guid: number, socket: Socket.Socket }[] = [];
+let clients: { guid: string, socket: Socket.Socket }[] = [];
 
 io.on('connection', socket => {
-    console.log('CLIENT CONNECTED');
-    startKinect(io);
-    const guid = Math.random() * 100;
+    const guid = generateGuid();
     clients.push({ guid, socket });
+    console.log('CLIENT CONNECTED = ', guid);
+    console.log('NUMBER OF CLIENTS = ', clients.length);
 
     socket.on('disconnect', async () => {
-        console.log('CLIENT DISCONNECTED');
         clients = clients.filter(client => client.guid !== guid);
+        console.log('CLIENT DISCONNECTED = ', guid);
+        console.log('NUMBER OF CLIENTS = ', clients.length);
 
         if (!clients.length) {
             stopKinect();
         }
     });
+
+    startKinect(io);
 });
 
 server.listen(PORT || 3000);
