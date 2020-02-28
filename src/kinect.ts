@@ -15,8 +15,6 @@ export const startKinect = (io: Socket.Server) => {
         kinect.startListening(data => io.sockets.emit('kinectData', data.depthImageFrame));
         console.log('KINECT STARTED');
     }
-
-    return kinect.getDepthModeRange(depthMode);
 };
 
 export const stopKinect = async () => {
