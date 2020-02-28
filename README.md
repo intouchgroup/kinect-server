@@ -8,7 +8,17 @@ Only **Azure Kinect** is supported
 
 `cd kinect-server && npm i`
 
-`npm run dev`
+`npm run dev` or `npm run start`
+
+
+**Note:** Make sure the required dll and onnx files were copied to the directory root. You can manually copy the files from `node_modules/kinect-azure` if necessary:
+
+* cublas64_100.dll
+* cudart64_100.dll
+* cudnn64_7.dll
+* dnn_model_2_0.onnx
+* onnxruntime.dll
+* vcomp140.dll
 
 
 ### Documentation
