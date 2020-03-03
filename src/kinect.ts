@@ -7,12 +7,12 @@ let kinectStarted = false;
 const depthMode = KinectAzure.K4A_DEPTH_MODE_NFOV_UNBINNED;
 const colorResolution = KinectAzure.K4A_COLOR_RESOLUTION_1080P;
 
-export const startKinect = (io: Socket.Server) => {
+export const startKinect = (kinectIO: Socket.Namespace) => {
     if (!kinectStarted && kinect.open()) {
         kinect.startCameras({ depth_mode: depthMode, color_resolution: colorResolution });
         kinectStarted = true;
         kinect.createTracker();
-        kinect.startListening(data => io.sockets.emit('kinectData', data.depthImageFrame));
+        kinect.startListening(data => kinectIO.emit('kinectData', data.depthImageFrame));
         console.log('KINECT STARTED');
     }
 };

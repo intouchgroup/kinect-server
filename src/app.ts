@@ -37,7 +37,7 @@ const io = Socket(server);
 
 let clients: { guid: string, socket: Socket.Socket }[] = [];
 
-io.on('connection', socket => {
+const kinectIO = io.of('/kinect').on('connection', socket => {
     const guid = generateGuid();
     clients.push({ guid, socket });
     console.log('CLIENT CONNECTED = ', guid);
@@ -53,7 +53,13 @@ io.on('connection', socket => {
         }
     });
 
-    startKinect(io);
+    startKinect(kinectIO);
+});
+
+const userIO = io.of('/users').on('connection', socket => {
+    setTimeout(() => {
+        socket.emit('userData', { name: 'Jacob', imageUrl: 'assets/images/jacob.jpg' });
+    }, 3000);
 });
 
 server.listen(PORT || 3000);
